@@ -1,5 +1,5 @@
 {
-    "shaderName": "TestShader",
+    "name": "TestShader",
     "properties": {
         "_color": {
             "desc": "color",

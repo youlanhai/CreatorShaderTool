@@ -276,7 +276,7 @@ export default function STShaderParser(){
 	let lexer = null;
 
 	let result = {
-		shaderName : "",
+		name : "",
 		properties : {},
 		subshaders : [],
 		fallback : "",
@@ -474,7 +474,7 @@ export default function STShaderParser(){
 
 		next();
 		if(token === TK_STRING){
-			result.shaderName = tokenValue;
+			result.name = tokenValue;
 			next();
 		}
 		matchToken(desc, '{');
