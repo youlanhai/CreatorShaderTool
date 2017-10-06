@@ -1,5 +1,6 @@
 import STShaderCache from "STShaderCache";
 import STMaterialCache from "STMaterialCache";
+import STShaderParser from "STShaderParser";
 
 function setProgram (node, program) {
     node.setGLProgramState(program);
@@ -48,6 +49,15 @@ cc.Class({
             if(ccnode.getGLProgramState() !== glProgramState){
                 cc.error("Failed to set glProgramState");
             }
+        }
+
+        let parser = STShaderParser();
+        try{
+            parser.parseFile("resources/test-shader2.shader");
+            cc.log("parse finished");
+        }
+        catch(err){
+            cc.error("error:", err);
         }
     },
 });
