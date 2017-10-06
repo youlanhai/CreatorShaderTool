@@ -1,0 +1,42 @@
+###############################################################################
+# Set default behavior to automatically normalize line endings.
+###############################################################################
+#* text eol=auto
+
+*.sln           text eol=crlf
+*.vcproj        text eol=crlf
+*.vcxproj       text eol=crlf
+*.vcxproj.filters text eol=crlf
+*.rc            text eol=crlf
+*.csproj        text eol=crlf
+*.bat           text eol=crlf
+
+*.c             text  eol=lf
+*.cmake         text  eol=lf
+*.cpp           text  eol=lf
+*.cxx           text  eol=lf
+*.cs            text  eol=lf
+*.gitattributes     text  eol=lf
+*.gitignore     text  eol=lf
+*.gitmodules    text  eol=lf
+*.h             text  eol=lf
+*.hpp           text  eol=lf
+*.html          text  eol=lf
+*.inl           text  eol=lf
+*.ipp           text  eol=lf
+*.json          text  eol=lf
+*.js            text  eol=lf
+*.fire          text  eol=lf
+*.lua           text  eol=lf
+*.md            text  eol=lf
+*.py            text  eol=lf
+*.sh            text  eol=lf
+*.shader        text  eol=lf
+*.txt           text  eol=lf
+*.xml           text  eol=lf
+*.frag			text  eol=lf
+*.vert			text  eol=lf
+*.plist         text  eol=lf
+*.meta          text  eol=lf
+*.ts            text  eol=lf
+*.go 			text  eol=lf
