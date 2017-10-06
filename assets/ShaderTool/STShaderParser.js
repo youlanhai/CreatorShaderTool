@@ -8,6 +8,7 @@ let BLANK_CHARS = "\t \r\n\b\f"
 let NUMBER_CHARS = "0123456789";
 let ALPHABET_CHARS = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 let IDENTITY_CHARS = ALPHABET_CHARS + NUMBER_CHARS + "_";
+let format = cc.js.formatStr;
 
 function translateChar(ch){
 	switch(ch){
@@ -196,6 +197,8 @@ function Lexer(content){
 	}
 
 	function next(){
+		value = null;
+
 		while(true){
 			let ch = getch();
 			if(ch === 0){
@@ -253,38 +256,254 @@ function Lexer(content){
 		}
 	}
 
+	function nextTokenInfo(){
+		return {
+			token : next(),
+			value : value,
+			line : line,
+			column : column,
+		};
+	}
+
 	return {
 		next : next,
 
+		nextTokenInfo : nextTokenInfo,
+
 		getValue(){
 			return value;
-		}
+		},
+
+		getLine(){
+			return line;
+		},
+
+		getColumn(){
+			return column;
+		},
 	}
 }
 
 export default function STShaderParser(){
 	let lexer = null;
 
+	let result = {
+		shaderName : "",
+		properties : {},
+		subshaders : [],
+		fallback : "",
+	}
+
+	let token = null;
+	let tokenValue = null;
+	let curTokenInfo = null;
+	let nextTokenInfo = null;
+
 	function next(){
-		return lexer.next();
+		if(nextTokenInfo !== null){
+			curTokenInfo = nextTokenInfo;
+			nextTokenInfo = null;
+		}
+		else{
+			curTokenInfo = lexer.nextTokenInfo();
+		}
+
+		token = curTokenInfo.token;
+		tokenValue = curTokenInfo.value;
+		//cc.log("lexer", token, tokenValue);
+		return token;
+	}
+
+	function lookAhead(){
+		if(nextTokenInfo === null){
+			nextTokenInfo = lexer.nextTokenInfo();
+		}
+		return nextTokenInfo.token;
+	}
+
+	function error(desc, msg){
+		let message = desc + ": " + msg + ". at line " + curTokenInfo.line + ": " + curTokenInfo.column;
+		throw message;
+	}
+
+	function matchToken(desc, tk){
+		if(token !== tk){
+			error(desc, format("token '%s' expected, but '%s' was given", tk, token));
+		}
+	}
+
+	function matchNext(desc, tk){
+		next();
+		return matchToken(desc, tk);
+	}
+
+	function parseValue(desc){
+		if(token === TK_NUMBER || token === TK_STRING || token === TK_IDENTITY){
+			return tokenValue;
+		}
+		else if(token === '('){
+			let ret = [];
+
+			next();
+			while(token !== ')'){
+				ret.push(parseValue(desc));
+
+				next();
+				if(token === ')'){
+					break;
+				}
+				matchToken(desc, ',');
+				next();
+			}
+
+			matchToken(desc, ')');
+			return ret;
+		}
+		else{
+			error(desc, format("value expected, but '%s' was given", token));
+		}
+	}
+
+	function parseProperties(){
+		let desc = "Properties";
+		matchNext(desc, '{');
+
+		next();
+		while(token !== '}'){
+			let property = {};
+
+			matchToken(desc, TK_IDENTITY);
+			let name = tokenValue;
+
+			matchNext(desc, '(');
+			matchNext(desc, TK_STRING);
+			property.desc = tokenValue;
+
+			matchNext(desc, ',');
+			matchNext(desc, TK_IDENTITY);
+			property.type = tokenValue;
+
+			matchNext(desc, ')');
+			matchNext(desc, '=')
+
+			next();
+			property.default = parseValue(desc);
+			matchNext(desc, ';');
+			
+			result.properties[name] = property;
+			cc.log("property", name, property);
+
+			next();
+		}
+
+		matchToken(desc, '}');
+	}
+
+	function parsePass(){
+		let desc = "Pass";
+		let pass = {};
+
+		matchNext(desc, "{");
+
+		next();
+		while(token !== '}'){
+			matchToken(desc, TK_IDENTITY);
+			let name = tokenValue;
+
+			matchNext(desc, '=');
+
+			next();
+			let value = parseValue(desc);
+			matchNext(desc, ';');
+
+			pass[name] = value;
+
+			next();
+		}
+
+		matchToken(desc, "}")
+		return pass;
+	}
+
+	function parseSubshader(){
+		let subshader = {
+			name : "",
+			passes : [],
+		};
+		let desc = "SubShader";
+
+		matchNext(desc, "{");
+
+		next();
+		while(token !== '}'){
+			if(token === TK_IDENTITY){
+				if(tokenValue === "Pass"){
+					let pass = parsePass();
+					subshader.passes.push(pass);
+				}
+				else{
+					error(desc, "Invalid token " + tokenValue);
+				}
+			}
+			else{
+				error(desc, "Invalid token " + token);
+			}
+
+			next();
+		}
+
+		matchToken(desc, "}");
+		result.subshaders.push(subshader);
+	}
+
+	function parseFallback(){
+		let desc = "Fallback";
+		matchNext(desc, TK_STRING);
+		result.fallback = tokenValue;
+		matchNext(desc, ";")
 	}
 
 	function parse(content){
 		lexer = Lexer(content);
 
-		while(true){
-			let token = next();
-			if(token == TK_NULL){
+		let desc = "Shader";
+
+		next();
+		if(token !== TK_IDENTITY || tokenValue !== "Shader"){
+			error(desc, "keyword 'Shader' expected but " + token + " was given");
+		}
+
+		next();
+		if(token === TK_STRING){
+			result.shaderName = tokenValue;
+			next();
+		}
+		matchToken(desc, '{');
+
+		next();
+		while(token !== '}'){
+			if(token === TK_NULL){
 				break;
 			}
-
-			if(token == TK_NUMBER || token == TK_STRING || token == TK_IDENTITY){
-				cc.log("parse", token, lexer.getValue());
+			if(token === ';'){
+				continue;
+			}
+			if(token === TK_IDENTITY){
+				switch(tokenValue){
+				case "Properties" : parseProperties(); break;
+				case "SubShader" : parseSubshader(); break;
+				case "Fallback" : parseFallback(); break;
+				default: error(desc, "Invalid token " + tokenValue);
+				}
 			}
 			else{
-				cc.log("parse", token);
+				error(desc, "Invalid token " + token);
 			}
+
+			next();
 		}
+
+		matchToken(desc, '}');
 		return true;
 	}
 
@@ -298,9 +517,23 @@ export default function STShaderParser(){
 		return parse(content);
 	}
 
+	function getResult(){
+		return result;
+	}
+
+	function saveResult(path){
+		let text = JSON.stringify(result, null, 4);
+		let fullPath = cc.url.raw(path);
+		jsb.fileUtils.writeStringToFile(text, fullPath);
+		cc.log("save result to", fullPath);
+	}
+
 	return {
 		__cname : "STShaderParser",
 		parse : parse,
 		parseFile : parseFile,
+
+		getResult : getResult,
+		saveResult : saveResult,
 	}
 }

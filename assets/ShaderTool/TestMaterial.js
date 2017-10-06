@@ -59,5 +59,7 @@ cc.Class({
         catch(err){
             cc.error("error:", err);
         }
+
+        parser.saveResult("resources/test-shader3.json");
     },
 });
