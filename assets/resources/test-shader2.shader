@@ -2,7 +2,7 @@ Shader "TestShader" {
 	
 	Properties {
 		_color("color", color) = (1, 1, 1, 1);
-		_time("time", float) = 1.0;
+		_time("time", float) = 1.234;
 		_pos("position", vec3) = (0, 0, 0);
 	}
 

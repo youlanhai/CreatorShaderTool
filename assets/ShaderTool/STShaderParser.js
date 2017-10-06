@@ -1,8 +1,8 @@
 
 let TK_NULL = null;
-let TK_IDENTITY = 257;
-let TK_STRING = 258;
-let TK_NUMBER = 259;
+let TK_IDENTITY = "identity";
+let TK_STRING = "string";
+let TK_NUMBER = "number";
 
 let BLANK_CHARS = "\t \r\n\b\f"
 let NUMBER_CHARS = "0123456789";
@@ -22,6 +22,7 @@ function translateChar(ch){
 	}
 }
 
+// Shader词法分析器
 function Lexer(content){
 	let index = 0;
 	let value = null;
@@ -256,7 +257,7 @@ function Lexer(content){
 		}
 	}
 
-	function nextTokenInfo(){
+	function nextToken(){
 		return {
 			token : next(),
 			value : value,
@@ -266,24 +267,11 @@ function Lexer(content){
 	}
 
 	return {
-		next : next,
-
-		nextTokenInfo : nextTokenInfo,
-
-		getValue(){
-			return value;
-		},
-
-		getLine(){
-			return line;
-		},
-
-		getColumn(){
-			return column;
-		},
+		nextToken : nextToken,
 	}
 }
 
+// Shader语法解析器
 export default function STShaderParser(){
 	let lexer = null;
 
@@ -296,34 +284,19 @@ export default function STShaderParser(){
 
 	let token = null;
 	let tokenValue = null;
-	let curTokenInfo = null;
-	let nextTokenInfo = null;
+	let tokenInfo = null;
+	let lastError = null;
 
 	function next(){
-		if(nextTokenInfo !== null){
-			curTokenInfo = nextTokenInfo;
-			nextTokenInfo = null;
-		}
-		else{
-			curTokenInfo = lexer.nextTokenInfo();
-		}
+		tokenInfo = lexer.nextToken();
 
-		token = curTokenInfo.token;
-		tokenValue = curTokenInfo.value;
-		//cc.log("lexer", token, tokenValue);
+		token = tokenInfo.token;
+		tokenValue = tokenInfo.value;
 		return token;
 	}
 
-	function lookAhead(){
-		if(nextTokenInfo === null){
-			nextTokenInfo = lexer.nextTokenInfo();
-		}
-		return nextTokenInfo.token;
-	}
-
 	function error(desc, msg){
-		let message = desc + ": " + msg + ". at line " + curTokenInfo.line + ": " + curTokenInfo.column;
-		throw message;
+		throw format("%s: %s. at line %d : %d", desc, msg, tokenInfo.line, tokenInfo.column);
 	}
 
 	function matchToken(desc, tk){
@@ -364,6 +337,12 @@ export default function STShaderParser(){
 		}
 	}
 
+	/** Properties语法：
+	 *  Properties {
+	 *      VarName(Description, Type) = Default;
+	 *      ...
+	 *  }
+	 */
 	function parseProperties(){
 		let desc = "Properties";
 		matchNext(desc, '{');
@@ -391,7 +370,6 @@ export default function STShaderParser(){
 			matchNext(desc, ';');
 			
 			result.properties[name] = property;
-			cc.log("property", name, property);
 
 			next();
 		}
@@ -399,6 +377,12 @@ export default function STShaderParser(){
 		matchToken(desc, '}');
 	}
 
+	/** Pass语法：
+	 *  Pass {
+	 *      key = value;
+	 *      ...
+	 *  }
+	 */
 	function parsePass(){
 		let desc = "Pass";
 		let pass = {};
@@ -425,6 +409,12 @@ export default function STShaderParser(){
 		return pass;
 	}
 
+	/** SubShader语法：
+	 *  SubShader {
+	 *      Pass{}
+	 *      ...
+	 *  }
+	 */
 	function parseSubshader(){
 		let subshader = {
 			name : "",
@@ -456,6 +446,9 @@ export default function STShaderParser(){
 		result.subshaders.push(subshader);
 	}
 
+	/** Fallback语法:
+	 *  Fallback "to/shader/path";
+	 */
 	function parseFallback(){
 		let desc = "Fallback";
 		matchNext(desc, TK_STRING);
@@ -463,9 +456,15 @@ export default function STShaderParser(){
 		matchNext(desc, ";")
 	}
 
-	function parse(content){
-		lexer = Lexer(content);
-
+	/** Shader语法：
+	 *  Shader name {
+	 *      Properties{}
+	 *      SubShader{}
+	 *      SubShader{}
+	 *      Fallback "path";  
+	 *  }
+	 */
+	function parseShader(){
 		let desc = "Shader";
 
 		next();
@@ -504,6 +503,19 @@ export default function STShaderParser(){
 		}
 
 		matchToken(desc, '}');
+	}
+
+	function parse(content){
+		lexer = Lexer(content);
+
+		try{
+			parseShader();
+		}
+		catch(err){
+			lastError = err;
+			cc.error("Parse shader failed: ", err);
+			return false;
+		}
 		return true;
 	}
 
@@ -535,5 +547,9 @@ export default function STShaderParser(){
 
 		getResult : getResult,
 		saveResult : saveResult,
+
+		getLastError(){
+			return lastError;
+		},
 	}
 }

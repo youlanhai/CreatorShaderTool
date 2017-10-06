@@ -52,14 +52,7 @@ cc.Class({
         }
 
         let parser = STShaderParser();
-        try{
-            parser.parseFile("resources/test-shader2.shader");
-            cc.log("parse finished");
-        }
-        catch(err){
-            cc.error("error:", err);
-        }
-
-        parser.saveResult("resources/test-shader3.json");
+        parser.parseFile("resources/test-shader2.shader");
+        parser.saveResult("resources/test-shader.json");
     },
 });
