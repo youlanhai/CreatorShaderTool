@@ -36,7 +36,7 @@ export default class STShader{
 
 	initWithData(data){
 		this.name = data.name;
-		this.properties = data.properties;
+		this.properties = data.properties || {};
 
 		let subshadersData = data.subshaders;
 		for(let key in subshadersData){

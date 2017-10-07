@@ -16,6 +16,7 @@ export default function STProgram(id, variants){
 
 		glProgram = new cc.GLProgram();
 		if(!glProgram.initWithString(vsh, fsh)){
+			cc.error("Failed create GLProgram:", id, variants);
 			return false;
 		}
 

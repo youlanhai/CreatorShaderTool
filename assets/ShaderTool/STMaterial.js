@@ -60,6 +60,7 @@ export default class STMaterial{
 
 		this.activeSubshader = null;
 		this.activeProgram = null;
+		this.activeGLProgramState = null;
 
 		this.glProgramStateCache = {};
 	}
@@ -74,7 +75,6 @@ export default class STMaterial{
 			ret.values[k] = this.values[k];
 		}
 
-		ret.activeSubshader = this.activeSubshader;
 		ret.setVariants(this.variants);
 		return ret;
 	}
@@ -106,16 +106,17 @@ export default class STMaterial{
 
 			// cocos2d-x目前不支持多pass，取第一个
 			this.activeProgram = this.activeSubshader.getFirstPass().getActiveProgram();
+			this.activeGLProgramState = this.createGLProgramState(this.activeProgram.getGLProgram());
 		}
 	}
 
 	updateUniforms(){
-		if(!this.activeProgram){
+		if(!this.activeGLProgramState){
 			return;
 		}
 
 		let properties = this.shader.properties;
-		let glProgram = this.createGLProgramState(this.activeProgram.getGLProgram());
+		let glProgram = this.activeGLProgramState;
 		let values = this.values;
 
 		for(let name in properties){
@@ -133,11 +134,25 @@ export default class STMaterial{
 		}
 	}
 
-	getActiveGLProgramState(){
-		if(this.activeProgram){
-			return this.createGLProgramState(this.activeProgram.getGLProgram());
+	setValue(key, value){
+		if(!this.activeGLProgramState){
+			return;
 		}
-		return null;
+		let typeInfo = this.shader.properties[key];
+		if(!typeInfo){
+			return;
+		}
+
+		let method = UniformSetters[typeInfo.type];
+		if(!method){
+			return;
+		}
+
+		method(this.activeGLProgramState, key, value);
+	}
+
+	getActiveGLProgramState(){
+		return this.activeGLProgramState;
 	}
 
 	createGLProgramState(glProgram){
@@ -150,9 +165,12 @@ export default class STMaterial{
 	}
 
 	applyToNode(node){
-		this.updateUniforms();
+		let glProgramState = this.activeGLProgramState;
+		if(!glProgramState){
+			return;
+		}
 
-		let glProgramState = this.getActiveGLProgramState();
+		this.updateUniforms();
 		setProgram(node._sgNode, glProgramState);
 	}
 
