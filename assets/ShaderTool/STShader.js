@@ -11,20 +11,6 @@ export default class STShader{
 		this.valid = false;
 	}
 
-	clone(){
-		let ret = new STShader();
-		ret.filePath = this.filePath;
-		ret.name = this.name;
-		ret.properties = this.properties;
-		ret.fallbackShader = this.fallbackShader;
-		ret.valid = this.valid;
-
-		for(let k in this.subshaders){
-			ret.subshaders.push(this.subshaders[k].clone());
-		}
-		return ret;
-	}
-
 	init(filePath){
 		this.filePath = filePath;
 

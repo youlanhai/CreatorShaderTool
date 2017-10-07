@@ -43,28 +43,26 @@ export default class STMaterial{
 		this.filePath = null;
 		this.shader = null;
 		this.variants = null;
-		this.properties = null;
+		this.values = null;
 
 		this.activeSubshader = null;
 		this.activeProgram = null;
+
+		this.glProgramStateCache = {};
 	}
 
 	clone(){
 		let ret = new STMaterial();
 		ret.filePath = this.filePath;
+		ret.shader = this.shader;
 
-		if(this.shader){
-			ret.shader = this.shader.clone();
-
-			ret.properties = {};
-			for(let k in this.properties){
-				ret.properties[k] = this.properties[k];
-			}
-
-			ret.activeSubshader = ret.shader.matchSubshader();
-
-			ret.setVariants(this.variants);
+		ret.values = {};
+		for(let k in this.values){
+			ret.values[k] = this.values[k];
 		}
+
+		ret.activeSubshader = this.activeSubshader;
+		ret.setVariants(this.variants);
 		return ret;
 	}
 
@@ -77,7 +75,7 @@ export default class STMaterial{
 
 		this.shader = STShaderCache.getOrCreate(data.shaderPath);
 		this.activeSubshader = this.shader.matchSubshader();
-		this.properties = data.properties;
+		this.values = data.values;
 
 		this.setVariants(null);
 		return true;
@@ -85,10 +83,6 @@ export default class STMaterial{
 
 	ifValiad(){
 		return this.shader && this.shader.ifValiad();
-	}
-
-	clone(){
-		return null;
 	}
 
 	setVariants(variants){
@@ -108,8 +102,8 @@ export default class STMaterial{
 		}
 
 		let properties = this.shader.properties;
-		let glProgram = this.activeProgram.getGLProgramState();
-		let values = this.properties;
+		let glProgram = this.createGLProgramState(this.activeProgram.getGLProgram());
+		let values = this.values;
 
 		for(let name in properties){
 			let typeInfo = properties[name];
@@ -128,8 +122,17 @@ export default class STMaterial{
 
 	getActiveGLProgramState(){
 		if(this.activeProgram){
-			return this.activeProgram.getGLProgramState();
+			return this.createGLProgramState(this.activeProgram.getGLProgram());
 		}
 		return null;
+	}
+
+	createGLProgramState(glProgram){
+		let glProgramState = this.glProgramStateCache[glProgram];
+		if(glProgramState === undefined){
+			glProgramState = cc.GLProgramState.create(glProgram);
+			this.glProgramStateCache[glProgram] = glProgramState;
+		}
+		return glProgramState;
 	}
 }

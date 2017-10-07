@@ -29,19 +29,6 @@ export default function STSubshader(){
 		}
 	}
 
-	function _copy(_name, _passes){
-		name = _name;
-		for(let k in _passes){
-			passes.push(_passes[k].clone());
-		}
-	}
-
-	function clone(){
-		let ret = STSubshader();
-		ret._copy(name, passes);
-		return ret;
-	}
-
 	self = {
 		__cname : "STSubshader",
 		init : init,
@@ -58,9 +45,6 @@ export default function STSubshader(){
 		getFirstPass(){
 			return passes[0];
 		},
-
-		_copy : _copy,
-		clone : clone,
 	}
 	return self;
 }

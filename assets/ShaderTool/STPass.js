@@ -8,21 +8,6 @@ export default function STPass(){
 	let varMap = {};
 	let activeProgram = null;
 
-	function _copy(_name, _programs, _varList, _varMap){
-		name = _name;
-		_varList = _varList;
-		_varMap = _varMap;
-		for(let k in _programs){
-			programs.push(_programs[k].clone());
-		}
-	}
-
-	function clone(){
-		let ret = STPass();
-		ret._copy(name, programs, varList, varMap);
-		return ret;
-	}
-
 	function id2vars(id){
 		let ret = [];
 		for(let i = 0; i < varList.length; ++i){
@@ -120,9 +105,6 @@ export default function STPass(){
 		getActiveProgram(){
 			return activeProgram;
 		},
-
-		_copy : _copy,
-		clone : clone,
 	}
 	return self;
 }

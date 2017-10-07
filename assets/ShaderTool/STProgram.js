@@ -1,7 +1,6 @@
 
 export default function STProgram(id, variants){
 	let self = null;
-	let glProgramState = null;
 	let glProgram = null;
 
 	function init(data){
@@ -23,15 +22,7 @@ export default function STProgram(id, variants){
 		glProgram.link();
 		glProgram.updateUniforms();
 		glProgram.use();
-
-		glProgramState = cc.GLProgramState.getOrCreateWithGLProgram(glProgram);
 		return true;
-	}
-
-	function clone(){
-		let ret = STProgram(id, variants);
-		ret._copy(glProgram, cc.GLProgramState.create(glProgram));
-		return ret;
 	}
 
 	self = {
@@ -45,16 +36,6 @@ export default function STProgram(id, variants){
 		getGLProgram(){
 			return glProgram;
 		},
-
-		getGLProgramState(){
-			return glProgramState;
-		},
-
-		_copy(_glProgram, _glProgramState){
-			glProgram = _glProgram;
-			glProgramState = _glProgramState;
-		},
-		clone : clone,
 	}
 	return self;
 }

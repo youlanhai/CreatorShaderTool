@@ -1,6 +1,6 @@
 {
 	"shaderPath" : "resources/test-shader.json",
-	"properties" : {
+	"values" : {
 		"color" : [1, 0, 0, 1],
 		"time" : 1
 	}
