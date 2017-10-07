@@ -38,6 +38,19 @@ let UniformSetters = {
 
 UniformSetters.color = UniformSetters.vec4;
 
+export function setProgram (node, program) {
+	node.setGLProgramState(program);
+
+	var children = node.children;
+	if (!children)
+		return;
+
+	for (var i = 0; i < children.length; i++){
+		setProgram(children[i], program);
+	}
+}
+
+
 export default class STMaterial{
 	constructor(){
 		this.filePath = null;
@@ -135,4 +148,12 @@ export default class STMaterial{
 		}
 		return glProgramState;
 	}
+
+	applyToNode(node){
+		this.updateUniforms();
+
+		let glProgramState = this.getActiveGLProgramState();
+		setProgram(node._sgNode, glProgramState);
+	}
+
 }

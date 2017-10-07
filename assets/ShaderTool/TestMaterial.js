@@ -9,8 +9,9 @@ function setProgram (node, program) {
     if (!children)
         return;
 
-    for (var i = 0; i < children.length; i++)
+    for (var i = 0; i < children.length; i++){
         setProgram(children[i], program);
+    }
 }
 
 cc.Class({

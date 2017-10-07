@@ -1,5 +1,6 @@
 import STSubshader from "./STSubshader";
 import {loadJsonFile} from "./STUtils";
+import STShaderParser from "./STShaderParser";
 
 export default class STShader{
 	constructor(){
@@ -14,11 +15,26 @@ export default class STShader{
 	init(filePath){
 		this.filePath = filePath;
 
-		let data = loadJsonFile(filePath);
+		let data = null;
+		if(filePath.length >= 7 && filePath.substr(-7) === ".shader"){
+			let parser = STShaderParser();
+			if(!parser.parseFile(filePath)){
+				return false;
+			}
+			data = parser.getResult();
+		}
+		else{
+			data = loadJsonFile(filePath);
+		}
+
 		if(!data){
 			return false;
 		}
 
+		return this.initWithData(data);
+	}
+
+	initWithData(data){
 		this.name = data.name;
 		this.properties = data.properties;
 
