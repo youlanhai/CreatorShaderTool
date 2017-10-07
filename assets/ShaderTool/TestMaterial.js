@@ -20,16 +20,11 @@ cc.Class({
     properties: {
         shaderPath : "resources/test-shader.json",
         materialPath : "resources/test-material.json",
-        texturePath : {
-            default : "",
-            url : cc.Texture2D,
-        }
     },
 
     // use this for initialization
     onLoad() {
-        cc.log("texture path", this.texturePath);
-        let texture = cc.textureCache.addImage(this.texturePath);
+        let texture = cc.textureCache.addImage(cc.url.raw("Texture/tex00.jpg"));
         cc.log("texture", texture);
         if(texture){
             texture.setTexParameters(gl.LINEAR, gl.LINEAR, gl.REPEAT, gl.REPEAT);
