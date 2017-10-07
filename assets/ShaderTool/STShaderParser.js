@@ -23,7 +23,7 @@ function translateChar(ch){
 }
 
 // Shader词法分析器
-function Lexer(content){
+export function Lexer(content){
 	let index = 0;
 	let value = null;
 	let line = 1;
@@ -377,6 +377,68 @@ export default function STShaderParser(){
 		matchToken(desc, '}');
 	}
 
+	function processVariants(pass){
+		let variants = pass.variants;
+		if(variants == undefined){
+			variants = [];
+			pass.variants = variants;
+		}
+
+		let varList = [];
+		let varMap = {};
+		// 将宏去重，并分配编号
+		for(let k in variants){
+			let name = variants[k];
+			if(varMap[name] === undefined){
+				varMap[name] = varList.length;
+				varList.push(name);
+			}
+		}
+
+		let defines = { 0 : [], };
+		// 排列组合
+		function arrangeVarints(id, depth, vars){
+			if(depth == varList.length){
+				defines[id] = vars.slice(0);
+			}
+			else{
+				arrangeVarints(id, depth + 1, vars);
+
+				id = id | (1 << depth);
+				vars.push(varList[depth]);
+				arrangeVarints(id, depth + 1, vars);
+				vars.pop();
+			}
+		}
+
+		function parseValidVariants(pairs){
+			for(let key in pairs){
+				let macros = pairs[key];
+				let id = 0;
+				for(let mk in macros){
+					let macro = macros[mk];
+					let i = varMap[macro];
+					if(i == undefined){
+						error("Pass", "undefined macro " + macro);
+					}
+					id |= 1 << i;
+				}
+				defines[id] = macros;
+			}
+		}
+
+		if(pass.valiadPairs){
+			parseValidVariants(pass.valiadPairs);
+			delete pass.valiadPairs;
+		}
+		else{
+			arrangeVarints(0, 0, []);
+		}
+
+		pass.variants = varList;
+		pass.defines = defines;
+	}
+
 	/** Pass语法：
 	 *  Pass {
 	 *      key = value;
@@ -406,6 +468,8 @@ export default function STShaderParser(){
 		}
 
 		matchToken(desc, "}")
+
+		processVariants(pass);
 		return pass;
 	}
 

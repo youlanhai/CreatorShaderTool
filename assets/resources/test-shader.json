@@ -37,7 +37,17 @@
                         "ENABLE_SHADOW"
                     ],
                     "vsh": "\n\t\t\t\tattribute vec4 a_position;\n\t\t\t\tattribute vec2 a_texCoord;\n\t\t\t\tattribute vec4 a_color;\n\t\t\t\tvarying vec2 v_texCoord;\n\t\t\t\tvarying vec4 v_fragmentColor;\n\t\t\t\tvoid main()\n\t\t\t\t{\n\t\t\t\t\tgl_Position = CC_PMatrix * a_position;\n\t\t\t\t\tv_fragmentColor = a_color;\n\t\t\t\t\tv_texCoord = a_texCoord;\n\t\t\t\t}\n\t\t\t",
-                    "fsh": "\n\t\t\t\t#ifdef GL_ES\n\t\t\t\tprecision mediump float;\n\t\t\t\t#endif\n\t\t\t\tvarying vec2 v_texCoord;\n\t\t\t\tvoid main()\n\t\t\t\t{\n\t\t\t\t\tvec3 v = texture2D(CC_Texture0, v_texCoord).rgb;\n\t\t\t\t\tfloat f = v.r * 0.299 + v.g * 0.587 + v.b * 0.114;\n\t\t\t\t\tgl_FragColor = vec4(f, f, f, 1.0);\n\t\t\t\t}\n\t\t\t"
+                    "fsh": "\n\t\t\t\t#ifdef GL_ES\n\t\t\t\tprecision mediump float;\n\t\t\t\t#endif\n\t\t\t\tvarying vec2 v_texCoord;\n\t\t\t\tvoid main()\n\t\t\t\t{\n\t\t\t\t\tvec3 v = texture2D(CC_Texture0, v_texCoord).rgb;\n\t\t\t\t\tfloat f = v.r * 0.299 + v.g * 0.587 + v.b * 0.114;\n\t\t\t\t\tgl_FragColor = vec4(f, f, f, 1.0);\n\t\t\t\t}\n\t\t\t",
+                    "defines": {
+                        "0": [],
+                        "1": [
+                            "ENABLE_LIGHT"
+                        ],
+                        "6": [
+                            "ENABLE_FOG",
+                            "ENABLE_SHADOW"
+                        ]
+                    }
                 }
             ]
         }

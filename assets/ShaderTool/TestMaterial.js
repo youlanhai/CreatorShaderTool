@@ -22,7 +22,15 @@ cc.Class({
     },
 
     // use this for initialization
-    onLoad: function () {
+    onLoad() {
+        this.testParser();
+
+        this.testShader();
+
+        this.testMaterial();
+    },
+
+    testShader(){
         cc.log("Test Shader ...");
         this.shader = STShaderCache.getOrCreate(this.shaderPath);
         cc.log("shader", this.shader, this.shader.filePath);
@@ -31,7 +39,9 @@ cc.Class({
         cc.log("matched subshader:", subshader);
         let program = subshader.getFirstPass().matchProgram(["ENABLE_SHADOW"]);
         cc.log("matched program:", program && program.getID());
+    },
 
+    testMaterial(){
         cc.log("Test Material ...");
         let material = STMaterialCache.getOrCreate(this.materialPath);
         if(!material.ifValiad()){
@@ -50,7 +60,10 @@ cc.Class({
                 cc.error("Failed to set glProgramState");
             }
         }
+    },
 
+    testParser(){
+        cc.log("Test Shader Parser ...");
         let parser = STShaderParser();
         parser.parseFile("resources/test-shader2.shader");
         parser.saveResult("resources/test-shader.json");

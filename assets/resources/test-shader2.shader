@@ -9,6 +9,10 @@ Shader "TestShader" {
 	SubShader {
 		Pass {
 			variants = (ENABLE_LIGHT, ENABLE_FOG, ENABLE_SHADOW);
+			valiadPairs = (
+				(ENABLE_LIGHT),
+				(ENABLE_FOG, ENABLE_SHADOW),
+			);
 
 			vsh = `
 				attribute vec4 a_position;
