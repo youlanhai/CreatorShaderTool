@@ -27,12 +27,19 @@ let UniformSetters = {
 	},
 
 	texture(glProgram, name, v){
-		let texture = null;
-		if(v){
-			let url = cc.url.raw(v);
-			texture = cc.textureCache.addImage(url);
+		if(!v){
+			return;
 		}
-		glProgram.setUniformTexture(name, texture);
+
+		let path = cc.url.raw(v);
+		let texture = cc.textureCache.addImage(path);
+
+		if(texture){
+			glProgram.setUniformTexture(name, texture);
+		}
+		else{
+			cc.error("Failed find material texture", path);
+		}
 	},
 }
 

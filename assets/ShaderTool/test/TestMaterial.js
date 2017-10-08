@@ -18,14 +18,14 @@ cc.Class({
     extends: cc.Component,
 
     properties: {
-        shaderPath : "resources/test-shader.json",
-        materialPath : "resources/test-material.json",
+        shaderPath : "resources/shaders/gray-compiled.json",
+        materialPath : "resources/materials/gray.mtl",
     },
 
     // use this for initialization
     onLoad() {
-        let texture = cc.textureCache.addImage(cc.url.raw("Texture/tex00.jpg"));
-        cc.log("texture", texture);
+        // creator暂时有bug，需要手动将纹理寻址模式改为repeat
+        let texture = cc.textureCache.addImage(cc.url.raw("resources/textures/tex00.jpg"));
         if(texture){
             texture.setTexParameters(gl.LINEAR, gl.LINEAR, gl.REPEAT, gl.REPEAT);
         }
@@ -72,7 +72,7 @@ cc.Class({
     testParser(){
         cc.log("Test Shader Parser ...");
         let parser = STShaderParser();
-        parser.parseFile("resources/test-shader2.shader");
-        parser.saveResult("resources/test-shader.json");
+        parser.parseFile("resources/shaders/gray.shader");
+        parser.saveResult("resources/shaders/gray-compiled.json");
     },
 });

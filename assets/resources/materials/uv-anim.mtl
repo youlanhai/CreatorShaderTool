@@ -1,4 +1,4 @@
 {
-	"shaderPath" : "resources/uv-anim.shader",
+	"shaderPath" : "resources/shaders/uv-anim.shader",
 	"values" : {}
 }

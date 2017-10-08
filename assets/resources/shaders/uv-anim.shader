@@ -27,7 +27,7 @@ Shader{
 				varying vec4 v_color;
 				void main()
 				{
-					gl_FragColor = texture(CC_Texture0, v_texCoord) * v_color;
+					gl_FragColor = texture2D(CC_Texture0, v_texCoord) * v_color;
 				}
 			`;
 		}

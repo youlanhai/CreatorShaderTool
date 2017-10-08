@@ -1,6 +1,7 @@
-Shader "TestShader" {
+Shader "GrayShader" {
 	
 	Properties {
+		// 一些测试属性。本shader用不到
 		_color("color", color) = (1, 1, 1, 1);
 		_time("time", float) = 1.234;
 		_pos("position", vec3) = (0, 0, 0);
@@ -8,6 +9,7 @@ Shader "TestShader" {
 
 	SubShader {
 		Pass {
+			// 测试变种宏。本shader用不到
 			variants = (ENABLE_LIGHT, ENABLE_FOG, ENABLE_SHADOW);
 			valiadPairs = (
 				(ENABLE_LIGHT),
