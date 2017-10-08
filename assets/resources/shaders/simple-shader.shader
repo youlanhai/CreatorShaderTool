@@ -5,7 +5,7 @@ Shader "SimpleShader" {
     }
     SubShader{
         Pass{
-            variants = (ENABLE_COLOR, );
+            variants = (ENABLE_COLOR, ENABLE_TEXTURE);
             vsh = `
                 attribute vec4 a_position;
                 attribute vec2 a_texCoord;
@@ -20,18 +20,27 @@ Shader "SimpleShader" {
             #ifdef GL_ES
                 precision mediump float;
             #endif
+
+            #ifdef ENABLE_TEXTURE
                 varying vec2 v_texCoord;
                 uniform sampler2D _MainTex;
+            #endif
+
             #ifdef ENABLE_COLOR
                 uniform vec4 _Color;
             #endif
+
                 void main()
                 {
-            #ifdef ENABLE_COLOR
-                    gl_FragColor = texture2D(_MainTex, v_texCoord) * _Color;
-            #else
-                    gl_FragColor = texture2D(_MainTex, v_texCoord);
+                    vec4 color = vec4(1, 1, 1, 1);
+            #ifdef ENABLE_TEXTURE
+                    color = texture2D(_MainTex, v_texCoord);
             #endif
+
+            #ifdef ENABLE_COLOR
+                    color *= _Color;
+            #endif
+                    gl_FragColor = color;
                 }
             `;
         }

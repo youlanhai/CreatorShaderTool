@@ -19,7 +19,7 @@ let UniformSetters = {
 	},
 
 	vec4(glProgram, name, v){
-		glProgram.setUniformVec2(name, {x: v[0], y: v[1], z: v[2], w: v[3]});
+		glProgram.setUniformVec4(name, {x: v[0], y: v[1], z: v[2], w: v[3]});
 	},
 
 	mat4(glProgram, name, v){
@@ -95,9 +95,9 @@ export default class STMaterial{
 
 		this.shader = STShaderCache.getOrCreate(data.shaderPath);
 		this.activeSubshader = this.shader.matchSubshader();
-		this.values = data.values;
+		this.values = data.values || {};
 
-		this.setVariants(null);
+		this.setVariants(data.variants || []);
 		return true;
 	}
 
