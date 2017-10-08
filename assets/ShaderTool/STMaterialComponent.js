@@ -1,4 +1,4 @@
-import STMaterialCache from "./STMaterialCache";
+import STMaterialCache from "./src/STMaterialCache";
 
 cc.Class({
     extends: cc.Component,
