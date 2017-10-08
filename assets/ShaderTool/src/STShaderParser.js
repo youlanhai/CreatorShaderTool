@@ -1,3 +1,4 @@
+import * as STUtils from "./STUtils";
 
 let TK_NULL = null;
 let TK_IDENTITY = "identity";
@@ -584,8 +585,7 @@ export default function STShaderParser(){
 	}
 
 	function parseFile(path){
-		let fullPath = cc.url.raw(path);
-		let content = jsb.fileUtils.getStringFromFile(fullPath);
+		let content = STUtils.readFile(path);
 		if(!content){
 			cc.error("Failed load file", path);
 			return false;
@@ -599,9 +599,8 @@ export default function STShaderParser(){
 
 	function saveResult(path){
 		let text = JSON.stringify(result, null, 4);
-		let fullPath = cc.url.raw(path);
-		jsb.fileUtils.writeStringToFile(text, fullPath);
-		cc.log("save result to", fullPath);
+		STUtils.writeFile(path, text);
+		cc.log("save result to", path);
 	}
 
 	return {

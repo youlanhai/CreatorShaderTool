@@ -40,12 +40,14 @@ cc.Class({
     testShader(){
         cc.log("Test Shader ...");
         this.shader = STShaderCache.getOrCreate(this.shaderPath);
-        cc.log("shader", this.shader, this.shader.filePath);
+        cc.log("shader", this.shader, this.shader.filePath, this.shader.ifValiad());
 
-        let subshader = this.shader.matchSubshader();
-        cc.log("matched subshader:", subshader);
-        let program = subshader.getFirstPass().matchProgram(["ENABLE_SHADOW"]);
-        cc.log("matched program:", program && program.getID());
+        if(this.shader.ifValiad()){
+            let subshader = this.shader.matchSubshader();
+            cc.log("matched subshader:", subshader);
+            let program = subshader.getFirstPass().matchProgram(["ENABLE_SHADOW"]);
+            cc.log("matched program:", program && program.getID());
+        }
     },
 
     testMaterial(){

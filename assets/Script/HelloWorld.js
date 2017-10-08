@@ -13,6 +13,9 @@ cc.Class({
     // use this for initialization
     onLoad: function () {
         this.label.string = this.text;
+        if(!cc.sys.isNative){
+            this.label.string = "暂不支持web平台";
+        }
     },
 
     // called every frame
