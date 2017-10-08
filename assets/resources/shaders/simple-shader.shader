@@ -1,11 +1,13 @@
 Shader "SimpleShader" {
-    Properties{
+    Properties{ // 材质属性
         _MainTex("Main Tex", texture) = "";
         _Color("Main Color", color) = (1, 1, 1, 1);
     }
     SubShader{
         Pass{
+            // 变种shader宏列表。shader会根据宏的排列组合，生成不同版本的shader
             variants = (ENABLE_COLOR, ENABLE_TEXTURE);
+            // 顶点着色器源码
             vsh = `
                 attribute vec4 a_position;
                 attribute vec2 a_texCoord;
@@ -16,6 +18,7 @@ Shader "SimpleShader" {
                     v_texCoord = a_texCoord;
                 }
             `;
+            // 片段着色器源码
             fsh = `
             #ifdef GL_ES
                 precision mediump float;
@@ -29,7 +32,6 @@ Shader "SimpleShader" {
             #ifdef ENABLE_COLOR
                 uniform vec4 _Color;
             #endif
-
                 void main()
                 {
                     vec4 color = vec4(1, 1, 1, 1);
