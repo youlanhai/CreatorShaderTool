@@ -130,7 +130,7 @@ fsh | 片段着色器代码。
 
 ## 3. 用法
 shader要结合材质一起使用，但也可以通过代码直接加载出来。
-```
+```js
 import STShaderCahce from "STShaderCahce";
 let shader = STShaderCahce.getOrCreate("path/to/shader");
 let program = shader.matchSubshader(flags).matchProgram(variants);
@@ -169,7 +169,7 @@ let glProgram = program.getGLProgram();
 给结点添加`STMaterialComponent`组件，在`Material Path`输入框中输入材质文件的路径(含后缀名)。
 
 ### 代码
-```
+```js
 import STMaterialCache from "STMaterialCache";
 let material = STMaterialCache.getOrCreate("path/to/material");
 material.applyToNode(this.node);
