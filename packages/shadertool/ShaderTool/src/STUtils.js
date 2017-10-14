@@ -48,7 +48,9 @@ function writeFile(path, content) {
 		jsb.fileUtils.writeStringToFile(content, fullPath);
 	} else {
 		cc.error("doens't support write file sync on this platform");
+		return false;
 	}
+	return true;
 }
 
 function loadJsonFile(path) {

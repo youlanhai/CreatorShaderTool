@@ -31,7 +31,7 @@ export default function STProgram(id, variants){
 			return true;
 		}
 		else{
-			return createGLProgram();
+			return createGLProgram(vsh, fsh);
 		}
 	}
 

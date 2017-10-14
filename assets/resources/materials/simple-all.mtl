@@ -3,10 +3,10 @@
     "values": {
         "_MainTex": "resources/textures/tex00.jpg",
         "_Color": [
-            1,
-            1,
-            1,
-            1
+            47,
+            187,
+            75,
+            202
         ]
     },
     "variants": [

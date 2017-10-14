@@ -35,7 +35,7 @@ function STProgram(id, variants) {
 		if (CC_EDITOR) {
 			return true;
 		} else {
-			return createGLProgram();
+			return createGLProgram(vsh, fsh);
 		}
 	}
 

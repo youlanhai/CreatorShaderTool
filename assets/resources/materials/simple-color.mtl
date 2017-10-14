@@ -1,7 +1,14 @@
 {
-	"shaderPath" : "resources/shaders/simple-shader.shader",
-	"values" : {
-		"_Color" : [1, 0, 0, 1]
-	},
-	"variants" : ["ENABLE_COLOR"]
+    "shaderPath": "resources/shaders/simple-shader.shader",
+    "values": {
+        "_Color": [
+            255,
+            0,
+            0,
+            255
+        ]
+    },
+    "variants": [
+        "ENABLE_COLOR"
+    ]
 }

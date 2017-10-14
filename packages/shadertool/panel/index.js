@@ -120,12 +120,25 @@ var ProperyUIBase = cc.Class({
 	},
 });
 
+var ProperyUIColor = cc.Class({
+	extends : ProperyUIBase,
+
+	setValue(cr){
+		this.uiValue.value = [cr[0], cr[1], cr[2], cr[3] / 255];
+	},
+
+	getValue(){
+		let cr = this.uiValue.value;
+		return [cr[0], cr[1], cr[2], Math.floor(cr[3] * 255)];
+	},
+})
+
 var TYPE_2_UI_CLASS = {
 	"float" : ProperyUIBase,
 	"int" : ProperyUIBase,
 	"string" : ProperyUIBase,
 	"texture" : ProperyUIBase,
-	"color" : ProperyUIBase,
+	"color" : ProperyUIColor,
 };
 
 Editor.Panel.extend({
@@ -196,7 +209,7 @@ Editor.Panel.extend({
 				continue;
 			}
 
-			let propertyUI = new ProperyUIBase();
+			let propertyUI = new cls();
 			if(!propertyUI.init(key, prop, this)){
 				Editor.error("Failed init property ui for", key);
 				continue;

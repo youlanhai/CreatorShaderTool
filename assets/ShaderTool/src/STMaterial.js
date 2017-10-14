@@ -22,6 +22,14 @@ let UniformSetters = {
 		glProgram.setUniformVec4(name, {x: v[0], y: v[1], z: v[2], w: v[3]});
 	},
 
+	color(glProgram, name, v){
+		let r = v[0] / 255;
+		let g = v[1] / 255;
+		let b = v[2] / 255;
+		let a = v[3] / 255;
+		glProgram.setUniformVec4(name, {x: r, y: g, z: b, w: a});
+	},
+
 	mat4(glProgram, name, v){
 		glProgram.setUniformMat4(name, v);
 	},
@@ -42,8 +50,6 @@ let UniformSetters = {
 		}
 	},
 }
-
-UniformSetters.color = UniformSetters.vec4;
 
 export function setProgram (node, program) {
 	node.setGLProgramState(program);
