@@ -235,7 +235,7 @@ export function Lexer(content){
 					continue;
 				}
 				else{
-					throw "invalid symbol '/'";
+					error("invalid symbol '/'");
 				}
 			}
 			else if(NUMBER_CHARS.indexOf(ch) >= 0){
@@ -254,7 +254,7 @@ export function Lexer(content){
 				return TK_IDENTITY;
 			}
 
-			throw "unsupported symbol " + ch;
+			error("unsupported symbol " + ch);
 		}
 	}
 

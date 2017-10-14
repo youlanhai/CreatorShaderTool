@@ -1,4 +1,5 @@
 // panel/index.js, this filename needs to match the one registered in package.json
+var fs = require("fs");
 
 var STYLE = `
 html,body{
@@ -55,6 +56,7 @@ var TYPE_2_UI_STYLE = {
 	"float" : "ui-num-input",
 	"int" : "ui-num-input",
 	"texture" : "ui-input",
+	"color" : "ui-color",
 };
 
 var ProperyUIBase = cc.Class({
@@ -123,6 +125,7 @@ var TYPE_2_UI_CLASS = {
 	"int" : ProperyUIBase,
 	"string" : ProperyUIBase,
 	"texture" : ProperyUIBase,
+	"color" : ProperyUIBase,
 };
 
 Editor.Panel.extend({
@@ -150,7 +153,7 @@ Editor.Panel.extend({
 			this.init();
 		}
 		catch(e){
-			Editor.log("Failed to init shader tool", e);
+			Editor.error("Failed to init shader tool", e);
 		}
 	},
 
@@ -160,11 +163,7 @@ Editor.Panel.extend({
 		this.$btnSaveAs.addEventListener("click", this.onBtnSaveAs.bind(this));
 		this.$btnNew.addEventListener("click", this.onBtnNew.bind(this));
 
-		this.createInspector();
-	},
-
-	createInspector(){
-		this.clearPropertiesUI();
+		this.material = null;
 
 		let properties = {
 			"MainTex" : {
@@ -179,6 +178,12 @@ Editor.Panel.extend({
 			},
 		}
 
+		this.createInspector(properties);
+	},
+
+	createInspector(properties){
+		this.clearPropertiesUI();
+
 		let parentNode = this.$propertyTable;
 		for(let key in properties){
 			let prop = properties[key];
@@ -186,13 +191,13 @@ Editor.Panel.extend({
 
 			let cls = TYPE_2_UI_CLASS[type];
 			if(!cls){
-				Editor.log("Failed find property ui class for type", type);
+				Editor.error("Failed find property ui class for type", type);
 				continue;
 			}
 
 			let propertyUI = new ProperyUIBase();
 			if(!propertyUI.init(key, prop, this)){
-				Editor.log("Failed init property ui for", key);
+				Editor.error("Failed init property ui for", key);
 				continue;
 			}
 
@@ -206,6 +211,20 @@ Editor.Panel.extend({
 		while(node.firstChild){
 			node.removeChild(node.firstChild);
 		}
+	},
+
+	loadMaterial(path){
+		let STMaterial = Editor.require("packages://shadertool/ShaderTool/src/STMaterial").default;
+		let material = new STMaterial();
+		if(!material.init(path)){
+			return Editor.Dialog.messageBox({
+				type : "error",
+				content : "加载文件失败",
+			})
+		}
+
+		this.material = material;
+		this.createInspector(material.properties);
 	},
 
 	// register your ipc messages here
@@ -233,6 +252,7 @@ Editor.Panel.extend({
 		let files = Editor.Dialog.openFile(options);
 		if(files.length > 0){
 			Editor.log("open", files[0]);
+			this.loadMaterial(files[0]);
 		}
 	},
 

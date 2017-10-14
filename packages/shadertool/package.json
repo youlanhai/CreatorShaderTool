@@ -7,9 +7,6 @@
   "main-menu": {
     "shadertool/open": {
       "message": "shadertool:open"
-    },
-    "i18n:MAIN_MENU.package.title/shadertool/hello": {
-      "message": "shadertool:say-hello"
     }
   },
   "panel": {

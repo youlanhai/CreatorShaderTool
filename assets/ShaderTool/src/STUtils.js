@@ -1,8 +1,23 @@
+let fs = null;
+
+if(CC_EDITOR){
+	fs = require("fs");
+}
+
+function isAbsPath(path){
+	return path[0] === '/' || path[1] === ':';
+}
 
 export function readFile(path){
-	let fullPath = cc.url.raw(path);
+	let fullPath = path;
+	if(!isAbsPath(path)){
+		fullPath = cc.url.raw(path);
+	}
 	let content = null;
-	if (cc.sys.isNative) {
+	if(CC_EDITOR){
+		content = fs.readFileSync(fullPath, {encoding: "utf-8"});
+	}
+	else if (cc.sys.isNative) {
 		content = jsb.fileUtils.getStringFromFile(fullPath);
 	}
 	else{
@@ -16,8 +31,14 @@ export function readFile(path){
 }
 
 export function writeFile(path, content){
-	let fullPath = cc.url.raw(path);
-	if(cc.sys.isNative){
+	let fullPath = path;
+	if(!isAbsPath(path)){
+		fullPath = cc.url.raw(path);
+	}
+	if(CC_EDITOR){
+		fs.writeFileSync(fullPath, content);
+	}
+	else if(cc.sys.isNative){
 		jsb.fileUtils.writeStringToFile(content, fullPath);
 	}
 	else{

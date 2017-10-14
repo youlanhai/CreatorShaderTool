@@ -3,6 +3,19 @@ export default function STProgram(id, variants){
 	let self = null;
 	let glProgram = null;
 
+	function createGLProgram(vsh, fsh){
+		glProgram = new cc.GLProgram();
+		if(!glProgram.initWithString(vsh, fsh)){
+			cc.error("Failed create GLProgram:", id, variants);
+			return false;
+		}
+
+		glProgram.link();
+		glProgram.updateUniforms();
+		glProgram.use();
+		return true;
+	}
+
 	function init(data){
 		let strs = [];
 		for(let key in variants){
@@ -14,16 +27,12 @@ export default function STProgram(id, variants){
 		let vsh = defines + data.vsh;
 		let fsh = defines + data.fsh;
 
-		glProgram = new cc.GLProgram();
-		if(!glProgram.initWithString(vsh, fsh)){
-			cc.error("Failed create GLProgram:", id, variants);
-			return false;
+		if(CC_EDITOR){
+			return true;
 		}
-
-		glProgram.link();
-		glProgram.updateUniforms();
-		glProgram.use();
-		return true;
+		else{
+			return createGLProgram();
+		}
 	}
 
 	self = {

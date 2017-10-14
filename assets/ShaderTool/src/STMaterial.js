@@ -64,6 +64,7 @@ export default class STMaterial{
 		this.shader = null;
 		this.variants = null;
 		this.values = null;
+		this.properties = null;
 
 		this.activeSubshader = null;
 		this.activeProgram = null;
@@ -96,6 +97,7 @@ export default class STMaterial{
 		this.shader = STShaderCache.getOrCreate(data.shaderPath);
 		this.activeSubshader = this.shader.matchSubshader();
 		this.values = data.values || {};
+		this.properties = this.shader.properties;
 
 		this.setVariants(data.variants || []);
 		return true;
@@ -163,6 +165,9 @@ export default class STMaterial{
 	}
 
 	createGLProgramState(glProgram){
+		if(CC_EDITOR){
+			return null;
+		}
 		let glProgramState = this.glProgramStateCache[glProgram];
 		if(glProgramState === undefined){
 			glProgramState = cc.GLProgramState.create(glProgram);
