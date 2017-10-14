@@ -598,8 +598,7 @@ export default function STShaderParser(){
 	}
 
 	function saveResult(path){
-		let text = JSON.stringify(result, null, 4);
-		STUtils.writeFile(path, text);
+		STUtils.saveJsonFile(path, result);
 		cc.log("save result to", path);
 	}
 

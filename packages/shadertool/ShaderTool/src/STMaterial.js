@@ -72,9 +72,10 @@ var STMaterial = function () {
 
 		this.filePath = null;
 		this.shader = null;
-		this.variants = null;
-		this.values = null;
-		this.properties = null;
+		this.shaderPath = null;
+		this.variants = [];
+		this.values = {};
+		this.properties = {};
 
 		this.activeSubshader = null;
 		this.activeProgram = null;
@@ -107,13 +108,32 @@ var STMaterial = function () {
 				return false;
 			}
 
-			this.shader = _STShaderCache2.default.getOrCreate(data.shaderPath);
+			this.shaderPath = data.shaderPath;
+			if (CC_EDITOR) {
+				this.shader = _STShaderCache2.default.reload(this.shaderPath);
+			} else {
+				this.shader = _STShaderCache2.default.getOrCreate(this.shaderPath);
+			}
 			this.activeSubshader = this.shader.matchSubshader();
 			this.values = data.values || {};
 			this.properties = this.shader.properties;
 
 			this.setVariants(data.variants || []);
 			return true;
+		}
+	}, {
+		key: "save",
+		value: function save(filePath) {
+			if (!filePath) {
+				filePath = this.filePath;
+			}
+
+			var data = {
+				shaderPath: this.shaderPath,
+				values: this.values,
+				variants: this.variants
+			};
+			return (0, _STUtils.saveJsonFile)(filePath, data);
 		}
 	}, {
 		key: "ifValiad",
@@ -160,6 +180,8 @@ var STMaterial = function () {
 	}, {
 		key: "setValue",
 		value: function setValue(key, value) {
+			this.values[key] = value;
+
 			if (!this.activeGLProgramState) {
 				return;
 			}

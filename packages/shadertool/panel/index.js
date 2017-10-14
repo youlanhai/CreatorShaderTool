@@ -164,6 +164,7 @@ Editor.Panel.extend({
 		this.$btnNew.addEventListener("click", this.onBtnNew.bind(this));
 
 		this.material = null;
+		this.propertiesUI = {};
 
 		let properties = {
 			"MainTex" : {
@@ -201,6 +202,8 @@ Editor.Panel.extend({
 				continue;
 			}
 
+			this.propertiesUI[key] = propertyUI;
+
 			let node = propertyUI.createUI();
 			parentNode.appendChild(node);
 		}
@@ -211,6 +214,7 @@ Editor.Panel.extend({
 		while(node.firstChild){
 			node.removeChild(node.firstChild);
 		}
+		this.propertiesUI = {};
 	},
 
 	loadMaterial(path){
@@ -225,6 +229,14 @@ Editor.Panel.extend({
 
 		this.material = material;
 		this.createInspector(material.properties);
+
+		let values = material.values;
+		for(let key in values){
+			let propertyUI = this.propertiesUI[key];
+			if(propertyUI){
+				propertyUI.setValue(values[key]);
+			}
+		}
 	},
 
 	// register your ipc messages here
@@ -236,6 +248,10 @@ Editor.Panel.extend({
 
 	onPropertyChange(key, value){
 		Editor.log("onPropertyChange", key, value);
+
+		if(this.material){
+			this.material.setValue(key, value);
+		}
 	},
 
 	onBtnNew(){
@@ -257,7 +273,17 @@ Editor.Panel.extend({
 	},
 
 	onBtnSave(){
-		Editor.log("save");
+		if(!this.material){
+			return;
+		}
+
+		if(!this.material.save()){
+			return Editor.Dialog.messageBox({
+				type : "error",
+				content : "保存失败",
+			})
+		}
+		Editor.log("save", this.material.filePath);
 	},
 
 	onBtnSaveAs(){

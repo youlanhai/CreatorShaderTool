@@ -43,7 +43,9 @@ export function writeFile(path, content){
 	}
 	else{
 		cc.error("doens't support write file sync on this platform");
+		return false;
 	}
+	return true;
 }
 
 export function loadJsonFile(path){
@@ -58,4 +60,9 @@ export function loadJsonFile(path){
 		return null;
 	}
 	return data;
+}
+
+export function saveJsonFile(path, data){
+	let content = JSON.stringify(data, null, 4);
+	return writeFile(path, content);
 }

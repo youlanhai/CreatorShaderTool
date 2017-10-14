@@ -1,5 +1,5 @@
 import STShaderCache from "./STShaderCache";
-import {loadJsonFile} from "./STUtils";
+import {loadJsonFile, saveJsonFile} from "./STUtils";
 
 let UniformSetters = {
 	int(glProgram, name, v){
@@ -62,9 +62,10 @@ export default class STMaterial{
 	constructor(){
 		this.filePath = null;
 		this.shader = null;
-		this.variants = null;
-		this.values = null;
-		this.properties = null;
+		this.shaderPath = null;
+		this.variants = [];
+		this.values = {};
+		this.properties = {};
 
 		this.activeSubshader = null;
 		this.activeProgram = null;
@@ -94,13 +95,32 @@ export default class STMaterial{
 			return false;
 		}
 
-		this.shader = STShaderCache.getOrCreate(data.shaderPath);
+		this.shaderPath = data.shaderPath;
+		if(CC_EDITOR){
+			this.shader = STShaderCache.reload(this.shaderPath);
+		}
+		else{
+			this.shader = STShaderCache.getOrCreate(this.shaderPath);
+		}
 		this.activeSubshader = this.shader.matchSubshader();
 		this.values = data.values || {};
 		this.properties = this.shader.properties;
 
 		this.setVariants(data.variants || []);
 		return true;
+	}
+
+	save(filePath){
+		if(!filePath){
+			filePath = this.filePath;
+		}
+
+		let data = {
+			shaderPath : this.shaderPath,
+			values : this.values,
+			variants : this.variants,
+		}
+		return saveJsonFile(filePath, data);
 	}
 
 	ifValiad(){
@@ -144,6 +164,8 @@ export default class STMaterial{
 	}
 
 	setValue(key, value){
+		this.values[key] = value;
+
 		if(!this.activeGLProgramState){
 			return;
 		}

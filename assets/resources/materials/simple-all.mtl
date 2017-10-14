@@ -1,8 +1,16 @@
 {
-	"shaderPath" : "resources/shaders/simple-shader.shader",
-	"values" : {
-		"_MainTex" : "resources/textures/tex00.jpg",
-		"_Color" : [1, 0, 0, 1]
-	},
-	"variants" : ["ENABLE_COLOR", "ENABLE_TEXTURE"]
+    "shaderPath": "resources/shaders/simple-shader.shader",
+    "values": {
+        "_MainTex": "resources/textures/tex00.jpg",
+        "_Color": [
+            1,
+            1,
+            1,
+            1
+        ]
+    },
+    "variants": [
+        "ENABLE_COLOR",
+        "ENABLE_TEXTURE"
+    ]
 }

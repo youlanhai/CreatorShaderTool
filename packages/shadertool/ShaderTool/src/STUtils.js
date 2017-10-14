@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", {
 exports.readFile = readFile;
 exports.writeFile = writeFile;
 exports.loadJsonFile = loadJsonFile;
+exports.saveJsonFile = saveJsonFile;
 var fs = null;
 
 if (CC_EDITOR) {
@@ -62,4 +63,9 @@ function loadJsonFile(path) {
 		return null;
 	}
 	return data;
+}
+
+function saveJsonFile(path, data) {
+	var content = JSON.stringify(data, null, 4);
+	return writeFile(path, content);
 }
