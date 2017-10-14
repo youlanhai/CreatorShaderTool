@@ -72,3 +72,5 @@ quick_gen_project_*_autogen.sh.meta
 
 client/assets/Script/sheet/*.meta
 client/assets/Script/sheet.meta
+
+/.babelrc
