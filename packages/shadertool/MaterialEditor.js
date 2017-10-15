@@ -1,15 +1,14 @@
-// panel/index.js, this filename needs to match the one registered in package.json
 var fs = require("fs");
 let STMaterial = require("./shaderTool/src/STMaterial").default;
 
 var TYPE_2_UI_STYLE = {
 	"float" : "ui-num-input",
 	"int" : "ui-num-input",
-	"texture" : "ui-input",
+	"texture" : "ui-asset",
 	"color" : "ui-color",
 };
 
-var ProperyUIBase = cc.Class({
+var PropertyUIBase = cc.Class({
 
 	init(name, property, inspector){
 		this.inspector = inspector;
@@ -70,8 +69,8 @@ var ProperyUIBase = cc.Class({
 	},
 });
 
-var ProperyUIColor = cc.Class({
-	extends : ProperyUIBase,
+var PropertyUIColor = cc.Class({
+	extends : PropertyUIBase,
 
 	setValue(cr){
 		this.uiValue.value = [cr[0], cr[1], cr[2], cr[3] / 255];
@@ -83,13 +82,33 @@ var ProperyUIColor = cc.Class({
 	},
 })
 
+var PropertyUITexture = cc.Class({
+	extends : PropertyUIBase,
+
+	createValueUI(){
+		var node = document.createElement(this.valueUIName);
+		node.setAttribute("style", "width: 200px");
+		node.setAttribute("type", "sprite-frame");
+		node.addEventListener("change", ()=>{
+			this.onValueChange();
+		});
+		return node;
+	},
+})
+
 var TYPE_2_UI_CLASS = {
-	"float" : ProperyUIBase,
-	"int" : ProperyUIBase,
-	"string" : ProperyUIBase,
-	"texture" : ProperyUIBase,
-	"color" : ProperyUIColor,
+	"float" : PropertyUIBase,
+	"int" : PropertyUIBase,
+	"string" : PropertyUIBase,
+	"texture" : PropertyUITexture,
+	"color" : PropertyUIColor,
 };
+
+function removeAllChildren(node){
+	while(node.firstChild){
+		node.removeChild(node.firstChild);
+	}
+}
 
 // 材质编辑器
 module.exports = cc.Class({
@@ -99,11 +118,15 @@ module.exports = cc.Class({
 	init(panel){
 		this.panel = panel;
 		this.propertyTable = panel.$propertyTable;
+		this.inputShaderPath = panel.$inputShaderPath;
 
 		panel.$btnOpen.addEventListener("click", this.onBtnOpen.bind(this));
 		panel.$btnSave.addEventListener("click", this.onBtnSave.bind(this));
 		panel.$btnSaveAs.addEventListener("click", this.onBtnSaveAs.bind(this));
 		panel.$btnNew.addEventListener("click", this.onBtnNew.bind(this));
+		panel.$btnRefreshShader.addEventListener("clieck", this.refreshSahderList.bind(this));
+
+		this.inputShaderPath.addEventListener("change", this.onShaderPathChange.bind(this));
 
 		this.material = null;
 		this.propertiesUI = {};
@@ -122,6 +145,7 @@ module.exports = cc.Class({
 		}
 
 		this.createInspector(properties);
+		this.refreshSahderList();
 	},
 
 	createInspector(properties){
@@ -152,10 +176,7 @@ module.exports = cc.Class({
 	},
 
 	clearPropertiesUI(){
-		let node = this.propertyTable;
-		while(node.firstChild){
-			node.removeChild(node.firstChild);
-		}
+		removeAllChildren(this.propertyTable);
 		this.propertiesUI = {};
 	},
 
@@ -170,6 +191,7 @@ module.exports = cc.Class({
 		}
 
 		this.material = material;
+		this.inputShaderPath.value = material.shaderPath;
 		this.createInspector(material.properties);
 
 		let values = material.values;
@@ -223,5 +245,41 @@ module.exports = cc.Class({
 
 	onBtnSaveAs(){
 
-	}
+	},
+
+	onShaderPathChange(){
+		let index = this.inputShaderPath.value;
+		Editor.log("shader path", index, this.shaderPaths[index]);
+	},
+
+	createShaderOption(index, name){
+		let node = document.createElement("option");
+		node.setAttribute("value", index);
+		node.innerText = name;
+		this.inputShaderPath.appendChild(node);
+	},
+
+	refreshSahderList(){
+		removeAllChildren(this.inputShaderPath);
+
+		let path = cc.url.raw("resources/shaders");
+		Editor.log("refresh shader:", path);
+
+		let files = fs.readdirSync(path);
+		let shaderPaths = [];
+		for(let i in files){
+			let name = files[i];
+			if(name.length > 7 && name.substr(name.length - 7) === ".shader"){
+				name = name.substr(0, name.length - 7);
+				shaderPaths.push(name);
+			}
+		}
+
+		this.shaderPaths = shaderPaths;
+		shaderPaths.sort();
+		for(let i = 0; i < shaderPaths.length; ++i){
+			let name = shaderPaths[i];
+			this.createShaderOption(i, name);
+		}
+	},
 });

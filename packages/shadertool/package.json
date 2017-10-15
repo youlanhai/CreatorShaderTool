@@ -7,6 +7,9 @@
   "main-menu": {
     "shadertool/open": {
       "message": "shadertool:open"
+    },
+    "shadertool/compile material" : {
+      "message" : "shadertool:compilematerial"
     }
   },
   "panel": {

@@ -41,10 +41,20 @@ var TEMPLATE = `
 			<ui-button id="btnSaveAs">另存</ui-button>
 			<ui-button id="btnNew">新建</ui-button>
 		</div>
-		<table id=propertyTable>
-			<tr> <td>名称</td> <td><ui-input>Hello World</ui-input></td> </tr>
-			<tr> <td>ID</td> <td><ui-num-input>1000</ui-num-input></td> </tr>
-		</table>
+		<ui-box-container>
+			<ui-label>Shader路径</ui-label>
+			<ui-select id="inputShaderPath" style="width: 200px">
+				<option value="0">测试0</option>
+				<option value="1">测试1</option>
+			</ui-select>
+			<ui-button id="btnRefreshShader">刷新</ui-button>
+		</ui-box-container>
+		<ui-box-container>
+			<table id=propertyTable>
+				<tr> <td>名称</td> <td><ui-input>Hello World</ui-input></td> </tr>
+				<tr> <td>ID</td> <td><ui-num-input>1000</ui-num-input></td> </tr>
+			</table>
+		</ui-box-container>
 	</ui-section>
 </div>
 <div class="rightstyle">
@@ -64,7 +74,9 @@ Editor.Panel.extend({
 		btnSave : '#btnSave',
 		btnSaveAs : '#btnSaveAs',
 		btnNew : '#btnNew',
+		inputShaderPath : '#inputShaderPath',
 		propertyTable : '#propertyTable',
+		btnRefreshShader : '#btnRefreshShader',
 	},
 
 	// method executed when template and styles are successfully loaded and initialized
