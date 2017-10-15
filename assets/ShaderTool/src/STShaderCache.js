@@ -2,8 +2,8 @@ import STShader from "./STShader";
 
 let shaderMap = {};
 
-function loadShader(path){
-	let shader = new STShader();
+function loadShader(path, glContext){
+	let shader = new STShader(glContext);
 	shaderMap[path] = shader;
 
 	if(!shader.init(path)){
@@ -14,13 +14,13 @@ function loadShader(path){
 
 let STShaderCache = {
 
-	getOrCreate(path){
+	getOrCreate(path, glContext){
 		let shader = shaderMap[path];
 		if(shader){
 			return shader;
 		}
 
-		return loadShader(path);
+		return loadShader(path, glContext);
 	},
 
 	get(path){

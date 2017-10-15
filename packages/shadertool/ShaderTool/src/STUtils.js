@@ -3,6 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
 	value: true
 });
+exports.isAbsPath = isAbsPath;
 exports.readFile = readFile;
 exports.writeFile = writeFile;
 exports.loadJsonFile = loadJsonFile;

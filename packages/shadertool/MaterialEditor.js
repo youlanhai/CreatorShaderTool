@@ -148,7 +148,7 @@ module.exports = cc.Class({
 		this.createInspector(properties);
 		this.refreshSahderList();
 
-		this.draw();
+		this.initGL();
 	},
 
 	createInspector(properties){
@@ -185,7 +185,7 @@ module.exports = cc.Class({
 
 	loadMaterial(path){
 		
-		let material = new STMaterial();
+		let material = new STMaterial(this.glContext);
 		if(!material.init(path)){
 			return Editor.Dialog.messageBox({
 				type : "error",
@@ -204,14 +204,18 @@ module.exports = cc.Class({
 				propertyUI.setValue(values[key]);
 			}
 		}
+
+		this.draw();
 	},
 
 	onPropertyChange(key, value){
-		Editor.log("onPropertyChange", key, value);
+		// Editor.log("onPropertyChange", key, value);
 
 		if(this.material){
 			this.material.setValue(key, value);
 		}
+		
+		this.draw();
 	},
 
 	onBtnNew(){
@@ -286,18 +290,61 @@ module.exports = cc.Class({
 		}
 	},
 
-	draw(){
+	initGL(){
 		let canvas = this.canvas;
 		let gl = canvas.getContext("webgl");
 		if(!gl){
 			return Editor.error("Failed to get webgl");
 		}
-
-		Editor.log("gl", gl);
+		this.glContext = gl;
 
 		gl.clearColor(0, 0, 0, 1.0);
 		gl.clear(gl.COLOR_BUFFER_BIT);
 
 		gl.viewport(0, 0, canvas.width, canvas.height);
+
+		let hw = 0.5;
+		let hh = 0.5;
+		let vertices = [
+			// left top
+			-hw, hh, 0,
+			0, 0,
+			// left bottom
+			-hw, -hh, 0,
+			0, 1,
+			// right top
+			hw, hh, 0,
+			1, 0,
+			// right bottom
+			hw, -hh, 0,
+			1, 1,
+		];
+
+		let vb = gl.createBuffer();
+		this.vertexBuffer = vb;
+
+		gl.bindBuffer(gl.ARRAY_BUFFER, vb);
+		gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+	},
+
+	draw(){
+		if(!this.material){
+			return;
+		}
+
+		let gl = this.glContext;
+		gl.clear(gl.COLOR_BUFFER_BIT);
+
+		this.material.use();
+		gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
+
+		let VERTS_BYTE_LENGTH = (3 + 2) * 4;
+
+        gl.enableVertexAttribArray(cc.macro.VERTEX_ATTRIB_POSITION);
+        gl.enableVertexAttribArray(cc.macro.VERTEX_ATTRIB_TEX_COORDS);
+        gl.vertexAttribPointer(cc.macro.VERTEX_ATTRIB_POSITION, 3, gl.FLOAT, false, VERTS_BYTE_LENGTH, 0);
+        gl.vertexAttribPointer(cc.macro.VERTEX_ATTRIB_TEX_COORDS, 2, gl.FLOAT, false, VERTS_BYTE_LENGTH, 12);
+
+		gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
 	},
 });

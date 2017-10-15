@@ -1,6 +1,6 @@
 import STProgram from "./STProgram";
 
-export default function STPass(){
+export default function STPass(glContext){
 	let self = null;
 	let name = null;
 	let programs = {};
@@ -31,7 +31,7 @@ export default function STPass(){
 		let defines = data.defines;
 		for(let id in defines){
 			let vars = defines[id];
-			let program = STProgram(id, vars);
+			let program = STProgram(id, vars, glContext);
 			if(!program.init(data)){
 				return false;
 			}

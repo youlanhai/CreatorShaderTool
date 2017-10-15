@@ -21,9 +21,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var STShader = function () {
-	function STShader() {
+	function STShader(glContext) {
 		_classCallCheck(this, STShader);
 
+		this.glContext = glContext;
 		this.filePath = null;
 		this.name = null;
 		this.properties = null;
@@ -63,7 +64,7 @@ var STShader = function () {
 			var subshadersData = data.subshaders;
 			for (var key in subshadersData) {
 				var subshaderData = subshadersData[key];
-				var subshader = (0, _STSubshader2.default)();
+				var subshader = (0, _STSubshader2.default)(this.glContext);
 				if (!subshader.init(subshaderData)) {
 					return false;
 				}

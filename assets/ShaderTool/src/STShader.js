@@ -3,7 +3,8 @@ import {loadJsonFile} from "./STUtils";
 import STShaderParser from "./STShaderParser";
 
 export default class STShader{
-	constructor(){
+	constructor(glContext){
+		this.glContext = glContext;
 		this.filePath = null;
 		this.name = null;
 		this.properties = null;
@@ -41,7 +42,7 @@ export default class STShader{
 		let subshadersData = data.subshaders;
 		for(let key in subshadersData){
 			let subshaderData = subshadersData[key];
-			let subshader = STSubshader();
+			let subshader = STSubshader(this.glContext);
 			if(!subshader.init(subshaderData)){
 				return false;
 			}

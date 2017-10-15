@@ -1,7 +1,7 @@
 
 import STPass from "./STPass";
 
-export default function STSubshader(){
+export default function STSubshader(glContext){
 	let self = null;
 	let passes = [];
 	let name = null;
@@ -10,7 +10,7 @@ export default function STSubshader(){
 		name = data.name;
 		for(let i in data.passes){
 			let passData = data.passes[i];
-			let pass = STPass();
+			let pass = STPass(glContext);
 			if(!pass.init(passData)){
 				return false;
 			}

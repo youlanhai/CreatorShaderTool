@@ -12,8 +12,8 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var shaderMap = {};
 
-function loadShader(path) {
-	var shader = new _STShader2.default();
+function loadShader(path, glContext) {
+	var shader = new _STShader2.default(glContext);
 	shaderMap[path] = shader;
 
 	if (!shader.init(path)) {
@@ -23,13 +23,13 @@ function loadShader(path) {
 }
 
 var STShaderCache = {
-	getOrCreate: function getOrCreate(path) {
+	getOrCreate: function getOrCreate(path, glContext) {
 		var shader = shaderMap[path];
 		if (shader) {
 			return shader;
 		}
 
-		return loadShader(path);
+		return loadShader(path, glContext);
 	},
 	get: function get(path) {
 		return shaderMap[path];

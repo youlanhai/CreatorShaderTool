@@ -11,7 +11,7 @@ var _STProgram2 = _interopRequireDefault(_STProgram);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function STPass() {
+function STPass(glContext) {
 	var self = null;
 	var name = null;
 	var programs = {};
@@ -41,7 +41,7 @@ function STPass() {
 		var defines = data.defines;
 		for (var id in defines) {
 			var vars = defines[id];
-			var program = (0, _STProgram2.default)(id, vars);
+			var program = (0, _STProgram2.default)(id, vars, glContext);
 			if (!program.init(data)) {
 				return false;
 			}

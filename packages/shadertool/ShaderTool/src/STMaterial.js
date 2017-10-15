@@ -18,7 +18,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var UniformSetters = {
+var GLProgramState = null;
+
+if (CC_EDITOR) {
+	GLProgramState = require("../../CCGLProgramState");
+} else {
+	GLProgramState = cc.GLProgramState;
+}
+
+var UNIFORM_SETTERS = {
 	int: function int(glProgram, name, v) {
 		glProgram.setUniformInt(name, v);
 	},
@@ -29,7 +37,7 @@ var UniformSetters = {
 		glProgram.setUniformVec2(name, { x: v[0], y: v[1] });
 	},
 	vec3: function vec3(glProgram, name, v) {
-		glProgram.setUniformVec2(name, { x: v[0], y: v[1], z: v[2] });
+		glProgram.setUniformVec3(name, { x: v[0], y: v[1], z: v[2] });
 	},
 	vec4: function vec4(glProgram, name, v) {
 		glProgram.setUniformVec4(name, { x: v[0], y: v[1], z: v[2], w: v[3] });
@@ -72,9 +80,10 @@ function setProgram(node, program) {
 }
 
 var STMaterial = function () {
-	function STMaterial() {
+	function STMaterial(glContext) {
 		_classCallCheck(this, STMaterial);
 
+		this.glContext = glContext;
 		this.filePath = null;
 		this.shader = null;
 		this.shaderPath = null;
@@ -115,9 +124,9 @@ var STMaterial = function () {
 
 			this.shaderPath = data.shaderPath;
 			if (CC_EDITOR) {
-				this.shader = _STShaderCache2.default.reload(this.shaderPath);
+				this.shader = _STShaderCache2.default.reload(this.shaderPath, this.glContext);
 			} else {
-				this.shader = _STShaderCache2.default.getOrCreate(this.shaderPath);
+				this.shader = _STShaderCache2.default.getOrCreate(this.shaderPath, this.glContext);
 			}
 			this.activeSubshader = this.shader.matchSubshader();
 			this.values = data.values || {};
@@ -174,8 +183,8 @@ var STMaterial = function () {
 				var type = typeInfo.type;
 				var value = values[name] || typeInfo.default;
 
-				var method = UniformSetters[type];
-				if (method === undefined) {
+				var method = UNIFORM_SETTERS[type];
+				if (!method) {
 					cc.error("unsupported uniform type", type, name);
 				} else {
 					method(glProgram, name, value);
@@ -195,7 +204,7 @@ var STMaterial = function () {
 				return;
 			}
 
-			var method = UniformSetters[typeInfo.type];
+			var method = UNIFORM_SETTERS[typeInfo.type];
 			if (!method) {
 				return;
 			}
@@ -210,12 +219,9 @@ var STMaterial = function () {
 	}, {
 		key: "createGLProgramState",
 		value: function createGLProgramState(glProgram) {
-			if (CC_EDITOR) {
-				return null;
-			}
 			var glProgramState = this.glProgramStateCache[glProgram];
 			if (glProgramState === undefined) {
-				glProgramState = cc.GLProgramState.create(glProgram);
+				glProgramState = GLProgramState.create(glProgram);
 				this.glProgramStateCache[glProgram] = glProgramState;
 			}
 			return glProgramState;
@@ -230,6 +236,17 @@ var STMaterial = function () {
 
 			this.updateUniforms();
 			setProgram(node._sgNode, glProgramState);
+		}
+	}, {
+		key: "use",
+		value: function use() {
+			var glProgramState = this.activeGLProgramState;
+			if (!glProgramState) {
+				return;
+			}
+
+			this.updateUniforms();
+			glProgramState.use();
 		}
 	}]);
 

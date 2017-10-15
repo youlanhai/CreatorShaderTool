@@ -11,7 +11,7 @@ var _STPass2 = _interopRequireDefault(_STPass);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-function STSubshader() {
+function STSubshader(glContext) {
 	var self = null;
 	var passes = [];
 	var name = null;
@@ -20,7 +20,7 @@ function STSubshader() {
 		name = data.name;
 		for (var i in data.passes) {
 			var passData = data.passes[i];
-			var pass = (0, _STPass2.default)();
+			var pass = (0, _STPass2.default)(glContext);
 			if (!pass.init(passData)) {
 				return false;
 			}

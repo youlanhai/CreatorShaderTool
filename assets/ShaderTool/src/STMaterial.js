@@ -1,7 +1,16 @@
 import STShaderCache from "./STShaderCache";
 import {loadJsonFile, saveJsonFile} from "./STUtils";
 
-let UniformSetters = {
+let GLProgramState = null;
+
+if(CC_EDITOR){
+	GLProgramState = require("../../CCGLProgramState");
+}
+else{
+	GLProgramState = cc.GLProgramState;
+}
+
+let UNIFORM_SETTERS = {
 	int(glProgram, name, v){
 		glProgram.setUniformInt(name, v);
 	},
@@ -15,7 +24,7 @@ let UniformSetters = {
 	},
 
 	vec3(glProgram, name, v){
-		glProgram.setUniformVec2(name, {x: v[0], y: v[1], z: v[2]});
+		glProgram.setUniformVec3(name, {x: v[0], y: v[1], z: v[2]});
 	},
 
 	vec4(glProgram, name, v){
@@ -51,6 +60,7 @@ let UniformSetters = {
 	},
 }
 
+
 export function setProgram (node, program) {
 	node.setGLProgramState(program);
 
@@ -65,7 +75,8 @@ export function setProgram (node, program) {
 
 
 export default class STMaterial{
-	constructor(){
+	constructor(glContext){
+		this.glContext = glContext;
 		this.filePath = null;
 		this.shader = null;
 		this.shaderPath = null;
@@ -103,10 +114,10 @@ export default class STMaterial{
 
 		this.shaderPath = data.shaderPath;
 		if(CC_EDITOR){
-			this.shader = STShaderCache.reload(this.shaderPath);
+			this.shader = STShaderCache.reload(this.shaderPath, this.glContext);
 		}
 		else{
-			this.shader = STShaderCache.getOrCreate(this.shaderPath);
+			this.shader = STShaderCache.getOrCreate(this.shaderPath, this.glContext);
 		}
 		this.activeSubshader = this.shader.matchSubshader();
 		this.values = data.values || {};
@@ -159,8 +170,8 @@ export default class STMaterial{
 			let type = typeInfo.type;
 			let value = values[name] || typeInfo.default;
 
-			let method = UniformSetters[type];
-			if(method === undefined){
+			let method = UNIFORM_SETTERS[type];
+			if(!method){
 				cc.error("unsupported uniform type", type, name);
 			}
 			else{
@@ -180,7 +191,7 @@ export default class STMaterial{
 			return;
 		}
 
-		let method = UniformSetters[typeInfo.type];
+		let method = UNIFORM_SETTERS[typeInfo.type];
 		if(!method){
 			return;
 		}
@@ -193,12 +204,9 @@ export default class STMaterial{
 	}
 
 	createGLProgramState(glProgram){
-		if(CC_EDITOR){
-			return null;
-		}
 		let glProgramState = this.glProgramStateCache[glProgram];
 		if(glProgramState === undefined){
-			glProgramState = cc.GLProgramState.create(glProgram);
+			glProgramState = GLProgramState.create(glProgram);
 			this.glProgramStateCache[glProgram] = glProgramState;
 		}
 		return glProgramState;
@@ -214,4 +222,13 @@ export default class STMaterial{
 		setProgram(node._sgNode, glProgramState);
 	}
 
+	use(){
+		let glProgramState = this.activeGLProgramState;
+		if(!glProgramState){
+			return;
+		}
+
+		this.updateUniforms();
+		glProgramState.use();
+	}
 }
