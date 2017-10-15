@@ -43,7 +43,10 @@ function Mat4Setter(v){
 
 function TextureSetter(v){
 	return function(glProgram, name){
-		v.bind();
+		Editor.log("bindTexture", name, v);
+		let gl = glProgram._glContext;
+		gl.activeTexture(gl.TEXTURE0);
+		gl.bindTexture(gl.TEXTURE0, v);
 		glProgram.setUniformLocationWith1i(name, 0);
 	}
 }

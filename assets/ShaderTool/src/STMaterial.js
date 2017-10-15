@@ -10,28 +10,55 @@ else{
 	GLProgramState = cc.GLProgramState;
 }
 
+let TEXTURE_CACHE = {};
+function loadTextureInEditorMode(gl, path){
+	path = cc.url.raw(path);
+	let tex = TEXTURE_CACHE[path];
+	if(tex){
+		return tex;
+	}
+	
+	Editor.log("loadTextureInEditorMode", gl, path);
+
+	tex = gl.createTexture();
+	TEXTURE_CACHE[path] = tex;
+
+	gl.bindTexture(gl.TEXTURE_2D, tex);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+		new Uint8Array([255, 0, 0, 255])); 
+
+	let image = new Image();
+	image.src = path;
+	image.onload = function(){
+		Editor.log("texture loaded", path);
+		gl.bindTexture(gl.TEXTURE0, tex);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	}
+	return tex;
+}
+
 let UNIFORM_SETTERS = {
-	int(glProgram, name, v){
+	int(gl, glProgram, name, v){
 		glProgram.setUniformInt(name, v);
 	},
 
-	float(glProgram, name, v){
+	float(gl, glProgram, name, v){
 		glProgram.setUniformFloat(name, v);
 	},
 
-	vec2(glProgram, name, v){
+	vec2(gl, glProgram, name, v){
 		glProgram.setUniformVec2(name, {x: v[0], y: v[1]});
 	},
 
-	vec3(glProgram, name, v){
+	vec3(gl, glProgram, name, v){
 		glProgram.setUniformVec3(name, {x: v[0], y: v[1], z: v[2]});
 	},
 
-	vec4(glProgram, name, v){
+	vec4(gl, glProgram, name, v){
 		glProgram.setUniformVec4(name, {x: v[0], y: v[1], z: v[2], w: v[3]});
 	},
 
-	color(glProgram, name, v){
+	color(gl, glProgram, name, v){
 		let r = v[0] / 255;
 		let g = v[1] / 255;
 		let b = v[2] / 255;
@@ -39,23 +66,28 @@ let UNIFORM_SETTERS = {
 		glProgram.setUniformVec4(name, {x: r, y: g, z: b, w: a});
 	},
 
-	mat4(glProgram, name, v){
+	mat4(gl, glProgram, name, v){
 		glProgram.setUniformMat4(name, v);
 	},
 
-	texture(glProgram, name, v){
+	texture(gl, glProgram, name, v){
 		if(!v){
 			return;
 		}
 
-		let path = cc.url.raw(v);
-		let texture = cc.textureCache.addImage(path);
-
-		if(texture){
-			glProgram.setUniformTexture(name, texture);
+		if(CC_EDITOR){
+			let tex = loadTextureInEditorMode(gl, v);
+			glProgram.setUniformTexture(name, tex);
 		}
 		else{
-			cc.error("Failed find material texture", path);
+			let path = cc.url.raw(v);
+			let tex = cc.textureCache.addImage(path);
+			if(tex){
+				glProgram.setUniformTexture(name, tex);
+			}
+			else{
+				cc.error("Failed find material texture", path);
+			}
 		}
 	},
 }
@@ -112,19 +144,26 @@ export default class STMaterial{
 			return false;
 		}
 
-		this.shaderPath = data.shaderPath;
+		this.values = data.values || {};
+		this.variants = data.variants || [];
+
+		this.loadShader(data.shaderPath);
+		return true;
+	}
+
+	loadShader(shaderPath){
+		this.shaderPath = shaderPath;
 		if(CC_EDITOR){
-			this.shader = STShaderCache.reload(this.shaderPath, this.glContext);
+			this.shader = STShaderCache.reload(shaderPath, this.glContext);
 		}
 		else{
-			this.shader = STShaderCache.getOrCreate(this.shaderPath, this.glContext);
+			this.shader = STShaderCache.getOrCreate(shaderPath, this.glContext);
 		}
-		this.activeSubshader = this.shader.matchSubshader();
-		this.values = data.values || {};
-		this.properties = this.shader.properties;
 
-		this.setVariants(data.variants || []);
-		return true;
+		this.properties = this.shader.properties;
+		this.activeSubshader = this.shader.matchSubshader();
+
+		this.setVariants(this.variants);
 	}
 
 	save(filePath){
@@ -175,7 +214,7 @@ export default class STMaterial{
 				cc.error("unsupported uniform type", type, name);
 			}
 			else{
-				method(glProgram, name, value);
+				method(this.glContext, glProgram, name, value);
 			}
 		}
 	}
@@ -196,7 +235,7 @@ export default class STMaterial{
 			return;
 		}
 
-		method(this.activeGLProgramState, key, value);
+		method(this.glContext, this.activeGLProgramState, key, value);
 	}
 
 	getActiveGLProgramState(){

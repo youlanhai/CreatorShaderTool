@@ -4,7 +4,7 @@ let STMaterial = require("./shaderTool/src/STMaterial").default;
 var TYPE_2_UI_STYLE = {
 	"float" : "ui-num-input",
 	"int" : "ui-num-input",
-	"texture" : "ui-asset",
+	"texture" : "ui-input",
 	"color" : "ui-color",
 };
 
@@ -100,7 +100,7 @@ var TYPE_2_UI_CLASS = {
 	"float" : PropertyUIBase,
 	"int" : PropertyUIBase,
 	"string" : PropertyUIBase,
-	"texture" : PropertyUITexture,
+	"texture" : PropertyUIBase,
 	"color" : PropertyUIColor,
 };
 
@@ -214,7 +214,7 @@ module.exports = cc.Class({
 		if(this.material){
 			this.material.setValue(key, value);
 		}
-		
+
 		this.draw();
 	},
 

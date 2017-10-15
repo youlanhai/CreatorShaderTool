@@ -26,44 +26,74 @@ if (CC_EDITOR) {
 	GLProgramState = cc.GLProgramState;
 }
 
+var TEXTURE_CACHE = {};
+function loadTextureInEditorMode(gl, path) {
+	path = cc.url.raw(path);
+	var tex = TEXTURE_CACHE[path];
+	if (tex) {
+		return tex;
+	}
+
+	Editor.log("loadTextureInEditorMode", gl, path);
+
+	tex = gl.createTexture();
+	TEXTURE_CACHE[path] = tex;
+
+	gl.bindTexture(gl.TEXTURE_2D, tex);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([255, 0, 0, 255]));
+
+	var image = new Image();
+	image.src = path;
+	image.onload = function () {
+		Editor.log("texture loaded", path);
+		gl.bindTexture(gl.TEXTURE0, tex);
+		gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	};
+	return tex;
+}
+
 var UNIFORM_SETTERS = {
-	int: function int(glProgram, name, v) {
+	int: function int(gl, glProgram, name, v) {
 		glProgram.setUniformInt(name, v);
 	},
-	float: function float(glProgram, name, v) {
+	float: function float(gl, glProgram, name, v) {
 		glProgram.setUniformFloat(name, v);
 	},
-	vec2: function vec2(glProgram, name, v) {
+	vec2: function vec2(gl, glProgram, name, v) {
 		glProgram.setUniformVec2(name, { x: v[0], y: v[1] });
 	},
-	vec3: function vec3(glProgram, name, v) {
+	vec3: function vec3(gl, glProgram, name, v) {
 		glProgram.setUniformVec3(name, { x: v[0], y: v[1], z: v[2] });
 	},
-	vec4: function vec4(glProgram, name, v) {
+	vec4: function vec4(gl, glProgram, name, v) {
 		glProgram.setUniformVec4(name, { x: v[0], y: v[1], z: v[2], w: v[3] });
 	},
-	color: function color(glProgram, name, v) {
+	color: function color(gl, glProgram, name, v) {
 		var r = v[0] / 255;
 		var g = v[1] / 255;
 		var b = v[2] / 255;
 		var a = v[3] / 255;
 		glProgram.setUniformVec4(name, { x: r, y: g, z: b, w: a });
 	},
-	mat4: function mat4(glProgram, name, v) {
+	mat4: function mat4(gl, glProgram, name, v) {
 		glProgram.setUniformMat4(name, v);
 	},
-	texture: function texture(glProgram, name, v) {
+	texture: function texture(gl, glProgram, name, v) {
 		if (!v) {
 			return;
 		}
 
-		var path = cc.url.raw(v);
-		var texture = cc.textureCache.addImage(path);
-
-		if (texture) {
-			glProgram.setUniformTexture(name, texture);
+		if (CC_EDITOR) {
+			var tex = loadTextureInEditorMode(gl, v);
+			glProgram.setUniformTexture(name, tex);
 		} else {
-			cc.error("Failed find material texture", path);
+			var path = cc.url.raw(v);
+			var _tex = cc.textureCache.addImage(path);
+			if (_tex) {
+				glProgram.setUniformTexture(name, _tex);
+			} else {
+				cc.error("Failed find material texture", path);
+			}
 		}
 	}
 };
@@ -122,18 +152,26 @@ var STMaterial = function () {
 				return false;
 			}
 
-			this.shaderPath = data.shaderPath;
-			if (CC_EDITOR) {
-				this.shader = _STShaderCache2.default.reload(this.shaderPath, this.glContext);
-			} else {
-				this.shader = _STShaderCache2.default.getOrCreate(this.shaderPath, this.glContext);
-			}
-			this.activeSubshader = this.shader.matchSubshader();
 			this.values = data.values || {};
-			this.properties = this.shader.properties;
+			this.variants = data.variants || [];
 
-			this.setVariants(data.variants || []);
+			this.loadShader(data.shaderPath);
 			return true;
+		}
+	}, {
+		key: "loadShader",
+		value: function loadShader(shaderPath) {
+			this.shaderPath = shaderPath;
+			if (CC_EDITOR) {
+				this.shader = _STShaderCache2.default.reload(shaderPath, this.glContext);
+			} else {
+				this.shader = _STShaderCache2.default.getOrCreate(shaderPath, this.glContext);
+			}
+
+			this.properties = this.shader.properties;
+			this.activeSubshader = this.shader.matchSubshader();
+
+			this.setVariants(this.variants);
 		}
 	}, {
 		key: "save",
@@ -187,7 +225,7 @@ var STMaterial = function () {
 				if (!method) {
 					cc.error("unsupported uniform type", type, name);
 				} else {
-					method(glProgram, name, value);
+					method(this.glContext, glProgram, name, value);
 				}
 			}
 		}
@@ -209,7 +247,7 @@ var STMaterial = function () {
 				return;
 			}
 
-			method(this.activeGLProgramState, key, value);
+			method(this.glContext, this.activeGLProgramState, key, value);
 		}
 	}, {
 		key: "getActiveGLProgramState",

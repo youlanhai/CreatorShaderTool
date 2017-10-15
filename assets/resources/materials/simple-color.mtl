@@ -2,9 +2,9 @@
     "shaderPath": "resources/shaders/simple-shader.shader",
     "values": {
         "_Color": [
-            255,
-            0,
-            0,
+            86,
+            226,
+            51,
             255
         ]
     },

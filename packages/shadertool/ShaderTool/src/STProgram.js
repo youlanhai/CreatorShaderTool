@@ -19,16 +19,17 @@ function STProgram(id, variants, glContext) {
 	function createGLProgram(vsh, fsh) {
 		if (CC_EDITOR) {
 			cc.assert(glContext !== null, "setGLContext first");
+			glProgram = new GLProgram(null, null, glContext);
+		} else {
+			glProgram = new GLProgram();
 		}
 
-		glProgram = new GLProgram(null, null, glContext);
 		if (!glProgram.initWithString(vsh, fsh)) {
 			cc.error("Failed create GLProgram:", id, variants);
 			return false;
 		}
 
 		glProgram.link();
-		glProgram.use();
 		glProgram.updateUniforms();
 		return true;
 	}
