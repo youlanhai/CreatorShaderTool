@@ -87,8 +87,8 @@ var PropertyUITexture = cc.Class({
 
 	createValueUI(){
 		var node = document.createElement(this.valueUIName);
-		node.setAttribute("style", "width: 200px");
-		node.setAttribute("type", "sprite-frame");
+		node.setAttribute("type", "texture");
+		node.setAttribute("style", "width: 200px;margin-top:20px");
 		node.addEventListener("change", ()=>{
 			this.onValueChange();
 		});
@@ -119,6 +119,7 @@ module.exports = cc.Class({
 		this.panel = panel;
 		this.propertyTable = panel.$propertyTable;
 		this.inputShaderPath = panel.$inputShaderPath;
+		this.canvas = panel.$canvas;
 
 		panel.$btnOpen.addEventListener("click", this.onBtnOpen.bind(this));
 		panel.$btnSave.addEventListener("click", this.onBtnSave.bind(this));
@@ -146,6 +147,8 @@ module.exports = cc.Class({
 
 		this.createInspector(properties);
 		this.refreshSahderList();
+
+		this.draw();
 	},
 
 	createInspector(properties){
@@ -281,5 +284,20 @@ module.exports = cc.Class({
 			let name = shaderPaths[i];
 			this.createShaderOption(i, name);
 		}
+	},
+
+	draw(){
+		let canvas = this.canvas;
+		let gl = canvas.getContext("webgl");
+		if(!gl){
+			return Editor.error("Failed to get webgl");
+		}
+
+		Editor.log("gl", gl);
+
+		gl.clearColor(0, 0, 0, 1.0);
+		gl.clear(gl.COLOR_BUFFER_BIT);
+
+		gl.viewport(0, 0, canvas.width, canvas.height);
 	},
 });

@@ -14,20 +14,20 @@ h2 { color: #f90; }
 	border-right: 2px solid black;
 	height: 100%;
 	-webkit-overflow-scrolling: touch;
-		overflow: auto;
-		overflow-x: auto;
-		overflow-y: auto;
+	overflow: auto;
+	overflow-x: auto;
+	overflow-y: auto;
 }
 .rightstyle{
-	width : 49%;
+	width : 48%;
 	height: 100%;
-	float: left;
+	float: right;
 }
 .scrollview{
 	-webkit-overflow-scrolling: touch;
 	overflow: auto;
-		overflow-x: auto;
-		overflow-y: auto;
+	overflow-x: auto;
+	overflow-y: auto;
 }
 `;
 
@@ -58,7 +58,10 @@ var TEMPLATE = `
 	</ui-section>
 </div>
 <div class="rightstyle">
-	<canvas id="canvas" width="400" height="400"> my canvas </canvas>
+	<ui-label>测试标签</ui-label>
+	<ui-box-container>
+		<canvas id="canvas" width="400" height="400"> my canvas </canvas>
+	</ui-box-container>
 </div>
 `;
 
@@ -77,6 +80,7 @@ Editor.Panel.extend({
 		inputShaderPath : '#inputShaderPath',
 		propertyTable : '#propertyTable',
 		btnRefreshShader : '#btnRefreshShader',
+		canvas : '#canvas',
 	},
 
 	// method executed when template and styles are successfully loaded and initialized
