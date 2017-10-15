@@ -4,7 +4,7 @@ if(CC_EDITOR){
 	fs = require("fs");
 }
 
-function isAbsPath(path){
+export function isAbsPath(path){
 	return path[0] === '/' || path[1] === ':';
 }
 
